@@ -5,7 +5,11 @@ field_width = 10
 field_height = 10
 ship_count = [4,3,2,1] # количества (n+1)-клеточных кораблей
 
-cell_width = 40 # размер клетки
+cell_size = 80 # размер клетки
+border_size = 10 # толщина границы между клетками
+offset = 60 # расстояние от края окна
+
+
 
 
 
@@ -39,11 +43,11 @@ def place_ship(ship_size): # поставить один корабль
 
 
 def render():
-    global field, cell_width
+    global field, cell_size, border_size, offset
     
     for y, row in enumerate(field):
         for x, cell in enumerate(row):
-            pygame.draw.rect(screen, (255,255,255), (20+30*x,20+30*y, cell_width,cell_width))
+            pygame.draw.rect(screen, (200,200,200), (offset + x*(cell_size + border_size), offset + y*(cell_size + border_size), cell_size, cell_size))
         
 
 
