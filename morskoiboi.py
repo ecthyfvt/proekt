@@ -12,6 +12,8 @@ offset = 60 # расстояние от края окна
 
 
 
+pos = (0,0)
+
 
 
 def init_field(): # создать поле заданной ширины и высоты
@@ -43,11 +45,11 @@ def place_ship(ship_size): # поставить один корабль
 
 
 def render():
-    global field, cell_size, border_size, offset
+    global field, cell_size, border_size, offset, pos
     
     for y, row in enumerate(field):
         for x, cell in enumerate(row):
-            pygame.draw.rect(screen, (200,200,200), (offset + x*(cell_size + border_size), offset + y*(cell_size + border_size), cell_size, cell_size))
+            pygame.draw.rect(screen, (255,255 ,0), (offset + x*(cell_size + border_size), offset + y*(cell_size + border_size), cell_size, cell_size))
         
 
 
@@ -72,6 +74,9 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            pos = pygame.mouse.get_pos()
     
     clock.tick(60)
     
