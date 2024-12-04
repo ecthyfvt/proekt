@@ -5,8 +5,8 @@ field_width = 3
 field_height = 3
 ship_count = [4,3,2,1] # количества (n+1)-клеточных кораблей
 
-cell_size = 200 # размер клетки
-border_size = 30 # толщина границы между клетками
+cell_size = 180 # размер клетки
+border_size = 100 # толщина границы между клетками
 offset = 0 # расстояние от края окна
 
 
@@ -48,13 +48,11 @@ def get_clicked_cell(pos):
     global cell_size, border_size, offset, field_width, field_height
     # проверка что точка внутри поля
     if offset < pos[0] < offset + field_width * cell_size + (field_width-1) * border_size and offset < pos[1] < offset + field_height * cell_size + (field_height-1) * border_size:
-        
-        
         # проверка что попадает на клетку
         if (pos[0] - offset) % (cell_size + border_size) - border_size < cell_size and (pos[1] - offset) % (cell_size + border_size) - border_size < cell_size:
             
-            px
-            py =
+            px = (pos[0] - offset) // (cell_size + border_size)
+            py = (pos[1] - offset) // (cell_size + border_size)
             
         else:
             px = None
