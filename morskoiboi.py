@@ -1,4 +1,5 @@
 import pygame
+import random
 
 
 field_width = 10
@@ -16,7 +17,7 @@ colors = [] # цвета кораблей
 
 def init_field(): # создать поле заданной ширины и высоты
     global field, field_width, field_height
-    field = [[{'id':0, 'opened':0} for j in range(field_width)] for i in range(field_height)]
+    field = [[{'id':0, 'opened':1} for j in range(field_width)] for i in range(field_height)]
     # в клетках таблицы код клетки
     # 0 если пусто и натур. число если корабль, у каждого будет свой номер
     # и статус открытия, чтобы знать что рисовать 
@@ -25,11 +26,12 @@ def init_field(): # создать поле заданной ширины и в�
 
 
 def color(cell):
+    global colors
     if cell['opened']:
         if cell['id'] == 0:
-            return (45, 205, 227)
+            return (45, 105, 107)
         else:
-            return colors[cell['id']]
+            return colors[cell['id'] - 1]
     else:
         return  (104, 104, 104)
 
@@ -75,7 +77,7 @@ def has_empty_nbh(x,y):
 
 
 def place_ship(ship_size): # поставить один корабль
-    global field
+    global field, colors
     available_positions = [] # создаем список возможных позиций
     # в нем будут положение верхней левой клетки корабля и направление корабля (вертикально или горизонтально)
     # тут код для вычислений:
@@ -85,7 +87,28 @@ def place_ship(ship_size): # поставить один корабль
         for x, cell in enumerate(row):
             if cell['id'] == 0: # если клетка пустая
                 if has_empty_nbh(x,y): # проверяем что вокруг нее нет кораблей в квадрате 3 на 3
-                    pass # тут надо зайти в цикл и проверить клетку правее, еще правее и тд
+                    # тут надо зайти в цикл и проверить клетку правее, еще правее и тд
+                    
+                    for i in range(ship_size - 1):
+                        if not has_empty_nbh(x+i+1,y):
+                            is_good = False
+                    is_good = True
+                    
+                    if is_good:
+                        available_positions.append((x,y,'h'))
+                    
+                    
+                    for i in range(ship_size - 1):
+                        if not has_empty_nbh(x,y+i+1):
+                            is_good = False
+                    is_good = True
+                    
+                    if is_good:
+                        available_positions.append((x,y,'v'))
+                    
+                    
+                    
+                    
                     # и еще раз, только идем вниз
                     # в каждом цикле надо:
                     # всего проверить ship_size клеток
@@ -97,8 +120,22 @@ def place_ship(ship_size): # поставить один корабль
     
     
     # потом выберем случайную и ставим корабль туда
+    pos = random.choice(available_positions)
     
-
+    id = len(colors) + 1
+    
+    
+    if pos[2] == 'h':
+        for i in range(ship_size):
+            field[pos[1]][pos[0]+i]['id'] = id
+    
+    else:
+        for i in range(ship_size):
+            field[pos[1]+i][pos[0]]['id'] = id
+    
+    
+    colors.append((random.randint(0,255),random.randint(0,255),random.randint(0,255)))
+    
 
 
 
