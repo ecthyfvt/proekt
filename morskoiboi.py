@@ -16,7 +16,7 @@ colors = [] # цвета кораблей
 
 def init_field(): # создать поле заданной ширины и высоты
     global field, field_width, field_height
-    field = [[{'id':0, 'opened':False} for j in range(field_width)] for i in range(field_height)]
+    field = [[{'id':0, 'opened':0} for j in range(field_width)] for i in range(field_height)]
     # в клетках таблицы код клетки
     # 0 если пусто и натур. число если корабль, у каждого будет свой номер
     # и статус открытия, чтобы знать что рисовать 
@@ -31,7 +31,7 @@ def color(cell):
         else:
             return colors[cell['id']]
     else:
-        return  (194, 194, 194)
+        return  (104, 104, 104)
 
 
 
@@ -53,9 +53,20 @@ def place_all_ships(): # функция чтобы поставить кораб
 
 
 
-def is_empty_nbh(x,y):
-    global field
-    pass
+def has_empty_nbh(x,y):
+    global field, field_width, field_height
+    # смещение в стороны
+    ds = [(-1,-1), (-1, 0), (-1, 1), (0,-1), (0,1), (1,-1), (1,0), (1,1)]
+    
+    for d in ds:
+        if 0 <= x + d[0] <= field_width - 1 and 0 <= y + d[1] <= field_height - 1: # если в клетку можно сместиться
+            if field[y+d[1]][x+d[0]]['id'] != 0: # и она не пустая
+                return False # тест на отсутствие кораблей не пройден
+    
+    # прошли по всем ds и все ок
+    return True
+    
+    
 
 
 
@@ -73,7 +84,14 @@ def place_ship(ship_size): # поставить один корабль
     for y, row in enumerate(field):
         for x, cell in enumerate(row):
             if cell['id'] == 0: # если клетка пустая
-                if is_empty_nbh(x,y): # проверяем что вокруг нее нет кораблей в квадрате 3 на 3
+                if has_empty_nbh(x,y): # проверяем что вокруг нее нет кораблей в квадрате 3 на 3
+                    pass # тут надо зайти в цикл и проверить клетку правее, еще правее и тд
+                    # и еще раз, только идем вниз
+                    # в каждом цикле надо:
+                    # всего проверить ship_size клеток
+                    # условия на клетку для проверки: вокруг нет кораблей и клетка находится на поле
+                    # если все клетки проверены и все ок, то такое положение корабля возможно
+    
     
     
     
@@ -124,13 +142,13 @@ def render(): # нарисовать клеточки
 
 
 
-def process_click(cell):
+def process_click(coords):
     global field
     # если нажали на клетку
-    if cell[0] != None and cell[1] != None:
+    if coords[0] != None and coords[1] != None:
         # тестовая функция:
         # переключить состояние клетки 0 <-> 1
-        field[cell[1]][cell[0]] = 1 - field[cell[1]][cell[0]]
+        field[coords[1]][coords[0]]['opened'] = 1 - field[coords[1]][coords[0]]['opened']
 
 
 
