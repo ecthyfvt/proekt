@@ -9,41 +9,75 @@ cell_size = 95 # размер клетки
 border_size = 10 # толщина границы между клетками
 offset = 0 # расстояние от края окна
 
+colors = [] # цвета кораблей
 
-
-color = [(40, 138, 138), (210, 230, 100)]
-# цвет клетки с нулем будет такой 
-# по мере добавления кораблей добавим сюда цвета
 
 
 
 def init_field(): # создать поле заданной ширины и высоты
     global field, field_width, field_height
-    field = [[0 for j in range(field_width)] for i in range(field_height)]
-    # в клетках таблицы ноль если пусто и номер корабля если он там
+    field = [[{'id':0, 'opened':False} for j in range(field_width)] for i in range(field_height)]
+    # в клетках таблицы код клетки
+    # 0 если пусто и натур. число если корабль, у каждого будет свой номер
+    # и статус открытия, чтобы знать что рисовать 
+
+
+
+
+def color(cell):
+    if cell['opened']:
+        if cell['id'] == 0:
+            return (45, 205, 227)
+        else:
+            return colors[cell['id']]
+    else:
+        return  (194, 194, 194)
+
 
 
 
 
 def place_all_ships(): # функция чтобы поставить корабли на поле
     # надо разместить сначала самый длинный корабль
-    # потом корабль поменьше на свободное место
+    # потом корабль поменьше
+    # на свободное место
     # потом еще меньше до самого маленького
-    
-    # используем функцию place_ship для каждого корабля
+    for size, count in enumerate(ship_count[::-1]): # для всех размеров кораблей с самого большого
+        for i in range(count): # для каждого корабля
+            place_ship(len(ship_count)-size)
     pass
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
+def is_empty_nbh(x,y):
+    global field
+    pass
+
+
+
+
+
+
+
 def place_ship(ship_size): # поставить один корабль
     global field
     available_positions = [] # создаем список возможных позиций
     # в нем будут положение верхней левой клетки корабля и направление корабля (вертикально или горизонтально)
-    # тут код для вычислений будет
-    #
-    #
+    # тут код для вычислений:
+    
+    # проходим по каждой клетке поля
+    for y, row in enumerate(field):
+        for x, cell in enumerate(row):
+            if cell['id'] == 0: # если клетка пустая
+                if is_empty_nbh(x,y): # проверяем что вокруг нее нет кораблей в квадрате 3 на 3
+    
+    
+    
+    
     # потом выберем случайную и ставим корабль туда
     
 
@@ -80,7 +114,7 @@ def render(): # нарисовать клеточки
     global field, cell_size, border_size, offset
     for y, row in enumerate(field):
         for x, cell in enumerate(row):
-            pygame.draw.rect(screen, color[cell], (offset + x*(cell_size + border_size), offset + y*(cell_size + border_size), cell_size, cell_size))
+            pygame.draw.rect(screen, color(cell), (offset + x*(cell_size + border_size), offset + y*(cell_size + border_size), cell_size, cell_size))
         
 
 
