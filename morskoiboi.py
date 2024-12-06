@@ -10,7 +10,7 @@ cell_size = 95 # размер клетки
 border_size = 10 # толщина границы между клетками
 offset = 0 # расстояние от края окна
 
-colors = [] # цвета кораблей
+
 
 
 
@@ -25,13 +25,13 @@ def init_field(): # создать поле заданной ширины и в�
 
 
 
-def color(cell):
+def get_color(cell):
     global colors
     if cell['opened']:
         if cell['id'] == 0:
-            return (45, 105, 107)
+            return (20, 20, 20)
         else:
-            return colors[cell['id'] - 1]
+            return colors[cell['id']-1]
     else:
         return  (104, 104, 104)
 
@@ -39,11 +39,14 @@ def color(cell):
 
 
 
-def place_all_ships(): # функция чтобы поставить корабли на поле
-    # надо разместить сначала самый длинный корабль
+def place_all_ships(): 
+    # функция чтобы поставить корабли на поле
+    # надо разместить сначала самы#й длинный корабль
     # потом корабль поменьше
     # на свободное место
     # потом еще меньше до самого маленького
+    global colors
+    colors = []
     for size, count in enumerate(ship_count[::-1]): # для всех размеров кораблей с самого большого
         for i in range(count): # для каждого корабля
             place_ship(len(ship_count)-size)
@@ -61,7 +64,7 @@ def has_empty_nbh(x,y):
     ds = [(-1,-1), (-1, 0), (-1, 1), (0,-1), (0,1), (1,-1), (1,0), (1,1)]
     
     for d in ds:
-        if 0 <= x + d[0] <= field_width - 1 and 0 <= y + d[1] <= field_height - 1: # если в клетку можно сместиться
+        if in_field(x + d[0], y + d[1]): # если в клетку можно сместиться
             if field[y+d[1]][x+d[0]]['id'] != 0: # и она не пустая
                 return False # тест на отсутствие кораблей не пройден
     
@@ -72,12 +75,17 @@ def has_empty_nbh(x,y):
 
 
 
+def in_field(x,y):
+    global field_width, field_height
+    return (0 <= x <= field_width - 1) and (0 <= y <= field_height - 1)
+
 
 
 
 
 def place_ship(ship_size): # поставить один корабль
     global field, colors
+    
     available_positions = [] # создаем список возможных позиций
     # в нем будут положение верхней левой клетки корабля и направление корабля (вертикально или горизонтально)
     # тут код для вычислений:
@@ -85,63 +93,54 @@ def place_ship(ship_size): # поставить один корабль
     # проходим по каждой клетке поля
     for y, row in enumerate(field):
         for x, cell in enumerate(row):
-            if cell['id'] == 0: # если клетка пустая
-                if has_empty_nbh(x,y): # проверяем что вокруг нее нет кораблей в квадрате 3 на 3
-                    # тут надо зайти в цикл и проверить клетку правее, еще правее и тд
+            
+            # проверка горизонтального положения
+            is_good_position = None
+            for dx in range(ship_size): # для смещения на 0, 1 ... клетку от исходной
+                if in_field(x + dx, y):
+                    if has_empty_nbh(x + dx, y) and field[y][x+dx]['id'] == 0:
+                        if is_good_position != False:
+                            is_good_position = True
+                    else:
+                        is_good_position = False
+                        
+                else:
+                    is_good_position = False
                     
-                    for i in range(ship_size - 1):
-                        if not has_empty_nbh(x+i+1,y):
-                            is_good = False
-                    is_good = True
+            if is_good_position:
+                available_positions.append((x,y,'h'))
+            
+            # проверка вертикального положения
+            is_good_position = None
+            for dy in range(ship_size):
+                if in_field(x, y + dy):
+                    if has_empty_nbh(x, y + dy) and field[y+dy][x]['id'] == 0:
+                        if is_good_position != False:
+                            is_good_position = True
+                    else:
+                        is_good_position = False
+                        
+                else:
+                    is_good_position = False
                     
-                    if is_good:
-                        available_positions.append((x,y,'h'))
-                    
-                    
-                    for i in range(ship_size - 1):
-                        if not has_empty_nbh(x,y+i+1):
-                            is_good = False
-                    is_good = True
-                    
-                    if is_good:
-                        available_positions.append((x,y,'v'))
-                    
-                    
-                    
-                    
-                    # и еще раз, только идем вниз
-                    # в каждом цикле надо:
-                    # всего проверить ship_size клеток
-                    # условия на клетку для проверки: вокруг нет кораблей и клетка находится на поле
-                    # если все клетки проверены и все ок, то такое положение корабля возможно
+            if is_good_position:
+                available_positions.append((x,y,'v'))
+    
+    
+    if len(available_positions) > 0:
+        colors.append((random.randint(50,255), random.randint(50,255), random.randint(50,255)))
+        id = len(colors)
+        pos = random.choice(available_positions)
+        if pos[2] == 'h':
+            for dx in range(ship_size):
+                field[pos[1]][pos[0] + dx]['id'] = id
+        else:
+            for dy in range(ship_size):
+                field[pos[1] + dy][pos[0]]['id'] = id
     
     
     
     
-    
-    # потом выберем случайную и ставим корабль туда
-    pos = random.choice(available_positions)
-    
-    id = len(colors) + 1
-    
-    
-    if pos[2] == 'h':
-        for i in range(ship_size):
-            field[pos[1]][pos[0]+i]['id'] = id
-    
-    else:
-        for i in range(ship_size):
-            field[pos[1]+i][pos[0]]['id'] = id
-    
-    
-    colors.append((random.randint(0,255),random.randint(0,255),random.randint(0,255)))
-    
-
-
-
-
-
-
 def get_clicked_cell(pos):
     global cell_size, border_size, offset, field_width, field_height
     # проверка что точка внутри поля
@@ -169,7 +168,7 @@ def render(): # нарисовать клеточки
     global field, cell_size, border_size, offset
     for y, row in enumerate(field):
         for x, cell in enumerate(row):
-            pygame.draw.rect(screen, color(cell), (offset + x*(cell_size + border_size), offset + y*(cell_size + border_size), cell_size, cell_size))
+            pygame.draw.rect(screen, get_color(cell), (offset + x*(cell_size + border_size), offset + y*(cell_size + border_size), cell_size, cell_size))
         
 
 
@@ -186,7 +185,7 @@ def process_click(coords):
         # тестовая функция:
         # переключить состояние клетки 0 <-> 1
         field[coords[1]][coords[0]]['opened'] = 1 - field[coords[1]][coords[0]]['opened']
-
+        
 
 
 
