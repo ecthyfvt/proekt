@@ -8,7 +8,14 @@ field_width = 10
 field_height = 10
 ship_count = [4,3,2,1] # количества (n+1)-клеточных кораблей
 
-border_size = 0.1 # толщина границы между клетками
+
+
+border_fraction = 0.1 # толщина границы между клетками
+
+
+
+
+
 
 def init_field(): # создать поле заданной ширины и высоты
     global field, field_width, field_height
@@ -16,6 +23,11 @@ def init_field(): # создать поле заданной ширины и в�
     # в клетках таблицы код клетки
     # 0 если пусто и натур. число если корабль, у каждого будет свой номер
     # и статус открытия, чтобы знать что рисовать 
+
+
+
+
+
 
 
 def get_color(cell):
@@ -27,6 +39,11 @@ def get_color(cell):
             return colors[cell['id']-1]
     else:
         return  (104, 104, 104)
+
+
+
+
+
 
 
 def place_all_ships(): 
@@ -43,6 +60,10 @@ def place_all_ships():
     pass
 
 
+
+
+
+
 def has_empty_nbh(x,y):
     global field, field_width, field_height
     # смещение в стороны
@@ -55,11 +76,45 @@ def has_empty_nbh(x,y):
     
     # прошли по всем ds и все ок
     return True
-    
+
+
+
 
 def in_field(x,y):
     global field_width, field_height
     return (0 <= x <= field_width - 1) and (0 <= y <= field_height - 1)
+
+
+
+
+
+
+
+
+
+def get_dimensions(window_width, window_height):
+    global field_width, field_height, border_fraction, cell_size, border_size
+    
+    X = field_width * (1 + border_fraction) + border_fraction
+    Y = field_height * (1 + border_fraction) + border_fraction
+    
+    kx = field_width / X
+    ky = field_height / Y
+    
+    k = min(kx, ky)
+    
+    cell_size = k
+    border_size = k * border_fraction
+
+
+
+
+
+
+
+
+
+
 
 
 def place_ship(ship_size): # поставить один корабль
@@ -117,15 +172,21 @@ def place_ship(ship_size): # поставить один корабль
             for dy in range(ship_size):
                 field[pos[1] + dy][pos[0]]['id'] = id
 
-    
+
+
+
+
+
+
+
 def get_clicked_cell(pos):
-    global cell_size, border_size, offset, field_width, field_height
+    global cell_size, border_size, field_width, field_height
     # проверка, что точка внутри поля
-    if offset < pos[0] < offset + field_width * cell_size + (field_width-1) * border_size and offset < pos[1] < offset + field_height * cell_size + (field_height-1) * border_size:
+    if border_size < pos[0] < border_size + field_width * cell_size + (field_width-1) * border_size and border_size < pos[1] < border_size + field_height * cell_size + (field_height-1) * border_size:
         # проверка что попадает на клетку, а не между ними
-        if (pos[0] - offset) % (cell_size + border_size) < cell_size and 0 < (pos[1] - offset) % (cell_size + border_size) < cell_size:
-            px = (pos[0] - offset) // (cell_size + border_size)
-            py = (pos[1] - offset) // (cell_size + border_size)
+        if (pos[0] - border_size) % (cell_size + border_size) < cell_size and 0 < (pos[1] - border_size) % (cell_size + border_size) < cell_size:
+            px = (pos[0] - border_size) // (cell_size + border_size)
+            py = (pos[1] - border_size) // (cell_size + border_size)
         else:
             px = None
             py = None
@@ -135,11 +196,21 @@ def get_clicked_cell(pos):
     return (px, py)
 
 
+
+
+
+
+
 def render(): # нарисовать клеточки
-    global field, cell_size, border_size, offset
+    global field, cell_size, border_size
     for y, row in enumerate(field):
         for x, cell in enumerate(row):
-            pygame.draw.rect(screen, get_color(cell), (offset + x*(cell_size + border_size), offset + y*(cell_size + border_size), cell_size, cell_size))
+            pygame.draw.rect(screen, get_color(cell), (border_size + x*(cell_size + border_size), border_size + y*(cell_size + border_size), cell_size, cell_size))
+
+
+
+
+
 
 
 def process_click(coords):
@@ -149,21 +220,26 @@ def process_click(coords):
         # тестовая функция:
         # переключить состояние клетки 0 <-> 1
         field[coords[1]][coords[0]]['opened'] = 1 - field[coords[1]][coords[0]]['opened']
-        
+
+
+
+
+
+
+
 
 pygame.init()
 screen = pygame.display.set_mode((window_width, window_heigth))
 clock = pygame.time.Clock()
 
+cell_size, border_size = 100,10
 
-real_width, real_height = pygame.display.get_surface().get_size()
+current_width, current_height = pygame.display.get_surface().get_size()
 
 
 
 
-cell_size = 40 # размер клетки
-border_size = 5 # толщина границы между клетками
-offset = border_size # расстояние от края окна
+
 
 
 init_field() # создание игрового поля
