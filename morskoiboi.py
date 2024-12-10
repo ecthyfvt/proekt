@@ -8,7 +8,7 @@ field_width = 10 # ширина игрового поля
 field_height = 10 # высота поля
 ship_count = [7,3,1,2] # количества (n+1)-клеточных кораблей
 
-border_fraction = 0.2 # толщина границы между клетками
+border_fraction = 0.1 # толщина границы между клетками
 
 
 
@@ -16,7 +16,7 @@ border_fraction = 0.2 # толщина границы между клеткам�
 
 
 def init_field(field_width, field_height): # создать поле заданной ширины и высоты 
-    field = [[{'id':0, 'opened':1} for j in range(field_width)] for i in range(field_height)]
+    field = [[{'id':0, 'opened':0} for j in range(field_width)] for i in range(field_height)]
     return field
     # в клетках таблицы код клетки
     # 0 если пусто и натур. число если корабль, у каждого будет свой номер
@@ -216,7 +216,8 @@ def process_click(coords):
     if coords[0] != None and coords[1] != None:
         # тестовая функция:
         # переключить состояние клетки 0 <-> 1
-        field[coords[1]][coords[0]]['opened'] = 1 - field[coords[1]][coords[0]]['opened']
+        if field[coords[1]][coords[0]]['opened'] == 0:
+            field[coords[1]][coords[0]]['opened'] = 1
 
 
 
@@ -255,11 +256,14 @@ while running:
             
             clicked_cell = get_clicked_cell(pos)
             process_click(clicked_cell)
-            
-    
     clock.tick(60)
+
+    # начало рисования
+
     screen.fill((0,0,0))
-    
+
+    # поставить картинку
+
     render()
     
     
