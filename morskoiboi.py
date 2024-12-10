@@ -4,11 +4,9 @@ import random
 window_width = 800
 window_heigth = 600
 
-field_width = 10
-field_height = 10
-ship_count = [4,3,2,1] # количества (n+1)-клеточных кораблей
-
-
+field_width = 10 # ширина игрового поля
+field_height = 10 # высота поля
+ship_count = [0,0,3,1,2] # количества (n+1)-клеточных кораблей
 
 border_fraction = 0.1 # толщина границы между клетками
 
