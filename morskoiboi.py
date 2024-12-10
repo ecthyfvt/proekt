@@ -17,9 +17,9 @@ border_fraction = 0.1 # толщина границы между клеткам�
 
 
 
-def init_field(): # создать поле заданной ширины и высоты
-    global field, field_width, field_height
+def init_field(field_width, field_height): # создать поле заданной ширины и высоты 
     field = [[{'id':0, 'opened':1} for j in range(field_width)] for i in range(field_height)]
+    return field
     # в клетках таблицы код клетки
     # 0 если пусто и натур. число если корабль, у каждого будет свой номер
     # и статус открытия, чтобы знать что рисовать 
@@ -57,7 +57,6 @@ def place_all_ships():
     for size, count in enumerate(ship_count[::-1]): # для всех размеров кораблей с самого большого
         for i in range(count): # для каждого корабля
             place_ship(len(ship_count)-size)
-    pass
 
 
 
@@ -93,20 +92,20 @@ def in_field(x,y):
 
 
 def get_dimensions(window_width, window_height):
-    global field_width, field_height, border_fraction, cell_size, border_size
+    global field_width, field_height, border_fraction
     
     X = field_width * (1 + border_fraction) + border_fraction
     Y = field_height * (1 + border_fraction) + border_fraction
     
-    kx = field_width / X
-    ky = field_height / Y
+    kx = window_width / X
+    ky = window_height / Y
     
     k = min(kx, ky)
     
     cell_size = k
     border_size = k * border_fraction
 
-
+    return cell_size, border_size
 
 
 
@@ -185,8 +184,8 @@ def get_clicked_cell(pos):
     if border_size < pos[0] < border_size + field_width * cell_size + (field_width-1) * border_size and border_size < pos[1] < border_size + field_height * cell_size + (field_height-1) * border_size:
         # проверка что попадает на клетку, а не между ними
         if (pos[0] - border_size) % (cell_size + border_size) < cell_size and 0 < (pos[1] - border_size) % (cell_size + border_size) < cell_size:
-            px = (pos[0] - border_size) // (cell_size + border_size)
-            py = (pos[1] - border_size) // (cell_size + border_size)
+            px = int( (pos[0] - border_size) // (cell_size + border_size) )
+            py = int( (pos[1] - border_size) // (cell_size + border_size) )
         else:
             px = None
             py = None
@@ -232,17 +231,16 @@ pygame.init()
 screen = pygame.display.set_mode((window_width, window_heigth))
 clock = pygame.time.Clock()
 
-cell_size, border_size = 100,10
+
 
 current_width, current_height = pygame.display.get_surface().get_size()
 
 
+cell_size, border_size = get_dimensions(current_width, current_height)
 
 
 
-
-
-init_field() # создание игрового поля
+field = init_field(field_width, field_height) # создание игрового поля
 
 place_all_ships() 
 
