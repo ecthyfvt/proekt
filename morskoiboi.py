@@ -8,7 +8,7 @@ field_width = 10 # ширина игрового поля
 field_height = 10 # высота поля
 ship_count = [7,3,1,2] # количества (n+1)-клеточных кораблей
 
-border_fraction = 0.1 # толщина границы между клетками
+border_fraction = 0.02 # толщина границы между клетками
 
 
 
@@ -16,7 +16,7 @@ border_fraction = 0.1 # толщина границы между клеткам�
 
 
 def init_field(field_width, field_height): # создать поле заданной ширины и высоты 
-    field = [[{'id':0, 'opened':0} for j in range(field_width)] for i in range(field_height)]
+    field = [[{'id':0, 'opened':1} for j in range(field_width)] for i in range(field_height)]
     return field
     # в клетках таблицы код клетки
     # 0 если пусто и натур. число если корабль, у каждого будет свой номер
@@ -36,7 +36,7 @@ def get_color(cell):
         else:
             return colors[cell['id']-1]
     else:
-        return  (104, 104, 104)
+        return  (54, 54, 54)
 
 
 
@@ -92,6 +92,9 @@ def in_field(x,y):
 def get_dimensions(window_width, window_height):
     global field_width, field_height, border_fraction
     
+    
+    offset_x, offset_y = 0, 0
+    
     X = field_width * (1 + border_fraction) + border_fraction
     Y = field_height * (1 + border_fraction) + border_fraction
     
@@ -102,8 +105,19 @@ def get_dimensions(window_width, window_height):
     
     cell_size = k
     border_size = k * border_fraction
-
-    return cell_size, border_size
+    
+    
+    offset_x = (window_width - ((border_size + cell_size) * field_width + border_size)) / 2
+    
+    offset_y = (window_height - ((border_size + cell_size) * field_height + border_size)) / 2
+    
+    
+    
+    
+    
+    
+    
+    return cell_size, border_size, offset_x, offset_y
 
 
 
@@ -177,7 +191,12 @@ def place_ship(ship_size): # поставить один корабль
 
 
 def get_clicked_cell(pos):
-    global cell_size, border_size, field_width, field_height
+    global cell_size, border_size, field_width, field_height, offset_x, offset_y
+    
+    
+    pos[0], pos[1] = pos[0] - offset_x, pos[1] - offset_y
+    
+    
     # проверка, что точка внутри поля
     if border_size < pos[0] < border_size + field_width * cell_size + (field_width-1) * border_size and border_size < pos[1] < border_size + field_height * cell_size + (field_height-1) * border_size:
         # проверка что попадает на клетку, а не между ними
@@ -199,10 +218,10 @@ def get_clicked_cell(pos):
 
 
 def render(): # нарисовать клеточки
-    global field, cell_size, border_size
+    global field, cell_size, border_size, offset_x, offset_y
     for y, row in enumerate(field):
         for x, cell in enumerate(row):
-            pygame.draw.rect(screen, get_color(cell), (border_size + x*(cell_size + border_size), border_size + y*(cell_size + border_size), cell_size, cell_size))
+            pygame.draw.rect(screen, get_color(cell), (offset_x + border_size + x*(cell_size + border_size), offset_y + border_size + y*(cell_size + border_size), cell_size, cell_size))
 
 
 
@@ -231,13 +250,23 @@ screen = pygame.display.set_mode((window_width, window_heigth))
 clock = pygame.time.Clock()
 
 
-
 current_width, current_height = pygame.display.get_surface().get_size()
 
 
-cell_size, border_size = get_dimensions(current_width, current_height)
+cell_size, border_size, offset_x, offset_y = get_dimensions(current_width, current_height)
 
 
+
+
+
+
+
+bg = pygame.image.load('underwater_bg.jpg')
+
+
+
+
+bg = pygame.transform.smoothscale(bg, screen.get_size())
 
 field = init_field(field_width, field_height) # создание игрового поля
 
@@ -252,7 +281,7 @@ while running:
             running = False
         
         if event.type == pygame.MOUSEBUTTONDOWN:
-            pos = pygame.mouse.get_pos()
+            pos = list(pygame.mouse.get_pos())
             
             clicked_cell = get_clicked_cell(pos)
             process_click(clicked_cell)
@@ -261,7 +290,8 @@ while running:
     # начало рисования
 
     screen.fill((0,0,0))
-
+    screen.blit(bg, (0, 0))
+    
     # поставить картинку
 
     render()
