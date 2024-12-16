@@ -16,7 +16,7 @@ border_radius = 0.03 # толщина клеточек
 
 
 def init_field(field_width, field_height): # создать поле заданной ширины и высоты 
-    field = [[{'id':0, 'opened':1, 'orientation':None, 'type':None, 'size':0} for j in range(field_width)] for i in range(field_height)]
+    field = [[{'id':0, 'opened':0, 'orientation':None, 'type':None, 'size':0} for j in range(field_width)] for i in range(field_height)]
     return field
     # в клетках таблицы код клетки
     # 0 если пусто и натуральное число если корабль, у каждого будет свой номер
@@ -296,14 +296,10 @@ def process_click(coords):
     global field
     # если нажали на клетку
     if coords[0] != None and coords[1] != None:
-        # тестовая функция:
-        # переключить состояние клетки 0 <-> 1
+        
         if field[coords[1]][coords[0]]['opened'] == 0:
             field[coords[1]][coords[0]]['opened'] = 1
-        else:
-            field[coords[1]][coords[0]]['opened'] = 0
-
-
+        
 
 
 
