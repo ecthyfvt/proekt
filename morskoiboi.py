@@ -8,15 +8,15 @@ field_width = 10 # ширина игрового поля
 field_height = 10 # высота поля
 ship_count = [4,3,2,1] # количества (n+1)-клеточных кораблей
 
-border_fraction = 0.02 # толщина границы между клетками
+border_fraction = 0 # толщина границы между клетками
 
-
+border_radius = 0.03 # толщина клеточек
 
 
 
 
 def init_field(field_width, field_height): # создать поле заданной ширины и высоты 
-    field = [[{'id':0, 'opened':1, 'orientation':None, 'type':None, 'ULcellid':None} for j in range(field_width)] for i in range(field_height)]
+    field = [[{'id':0, 'opened':1, 'orientation':None, 'type':None, 'size':0} for j in range(field_width)] for i in range(field_height)]
     return field
     # в клетках таблицы код клетки
     # 0 если пусто и натуральное число если корабль, у каждого будет свой номер
@@ -93,7 +93,7 @@ def in_field(x,y):
 
 
 def get_dimensions(window_width, window_height):
-    global field_width, field_height, border_fraction
+    global field_width, field_height, border_fraction, border_radius
     
     
     offset_x, offset_y = 0, 0
@@ -116,11 +116,11 @@ def get_dimensions(window_width, window_height):
     
     
     
+    thickness = k * border_radius/2
     
     
     
-    
-    return cell_size, border_size, offset_x, offset_y
+    return cell_size, border_size, offset_x, offset_y, thickness
 
 
 
@@ -179,14 +179,15 @@ def place_ship(ship_size): # поставить один корабль
         colors.append((random.randint(50,255), random.randint(50,255), random.randint(50,255)))
         id = len(colors)
         pos = random.choice(available_positions)
-        ULcellid = str(pos)
 
-        field[pos[1]][pos[0]]['ULcellid'] = ULcellid
+
+
 
         if pos[2] == 'h':
             for dx in range(ship_size):
                 field[pos[1]][pos[0] + dx]['id'] = id
                 field[pos[1]][pos[0] + dx]['orientation'] = 'h'
+                field[pos[1]][pos[0] + dx]['size'] = ship_size
 
                 if dx == 0:
                     field[pos[1]][pos[0] + dx]['type'] = 'ULedge'
@@ -204,6 +205,7 @@ def place_ship(ship_size): # поставить один корабль
             for dy in range(ship_size):
                 field[pos[1] + dy][pos[0]]['id'] = id
                 field[pos[1] + dy][pos[0]]['orientation'] = 'v'
+                field[pos[1] + dy][pos[0]]['size'] = ship_size
 
                 if dy == 0:
                     field[pos[1] + dy][pos[0]]['type'] = 'ULedge'
@@ -253,9 +255,21 @@ def render(): # нарисовать клеточки
     global field, cell_size, border_size, offset_x, offset_y
     for y, row in enumerate(field):
         for x, cell in enumerate(row):
-            pygame.draw.rect(screen, get_color(cell), (offset_x + border_size + x*(cell_size + border_size), offset_y + border_size + y*(cell_size + border_size), cell_size, cell_size))
+            # pygame.draw.rect(screen, get_color(cell), (offset_x + border_size + x*(cell_size + border_size), offset_y + border_size + y*(cell_size + border_size), cell_size, cell_size))
+            pygame.draw.rect(screen, (0, 0, 0), (offset_x + border_size + x * (cell_size + border_size), offset_y + border_size + y * (cell_size + border_size), cell_size, cell_size), max(1, round(thickness)), border_radius=1)
 
-
+            if not cell['opened']:
+                pygame.draw.rect(screen, (100,100,100), (offset_x + border_size + x * (cell_size + border_size),
+                                                           offset_y + border_size + y * (cell_size + border_size),
+                                                           cell_size, cell_size))
+            elif cell['size'] == 1:
+                screen.blit(onecell, (offset_x + border_size + x*(cell_size + border_size), offset_y + border_size + y*(cell_size + border_size)))
+            elif cell['type'] == 'ULedge':
+                screen.blit(ul, (offset_x + border_size + x*(cell_size + border_size), offset_y + border_size + y*(cell_size + border_size)))
+            elif cell['type'] == 'center':
+                screen.blit(center, (offset_x + border_size + x*(cell_size + border_size), offset_y + border_size + y*(cell_size + border_size)))
+            elif cell['type'] == 'DRedge':
+                screen.blit(dr, (offset_x + border_size + x*(cell_size + border_size), offset_y + border_size + y*(cell_size + border_size)))
 
 
 
@@ -287,7 +301,7 @@ clock = pygame.time.Clock()
 current_width, current_height = pygame.display.get_surface().get_size()
 
 
-cell_size, border_size, offset_x, offset_y = get_dimensions(current_width, current_height)
+cell_size, border_size, offset_x, offset_y, thickness = get_dimensions(current_width, current_height)
 
 
 
@@ -296,11 +310,25 @@ cell_size, border_size, offset_x, offset_y = get_dimensions(current_width, curre
 
 
 bg_orig = pygame.image.load('underwater_bg.jpg')
+onecell_orig = pygame.image.load('1cell.jpg').convert()
+ul_orig = pygame.image.load('ul.jpg').convert()
+dr_orig = pygame.image.load('dr.jpg').convert()
+center_orig = pygame.image.load('center.jpg').convert()
+
+
+
 
 
 
 
 bg = pygame.transform.smoothscale(bg_orig, screen.get_size())
+onecell = pygame.transform.smoothscale(onecell_orig, (cell_size, cell_size))
+ul = pygame.transform.smoothscale(ul_orig, (cell_size, cell_size))
+dr = pygame.transform.smoothscale(dr_orig, (cell_size, cell_size))
+center = pygame.transform.smoothscale(center_orig, (cell_size, cell_size))
+
+
+
 
 field = init_field(field_width, field_height) # создание игрового поля
 
@@ -322,8 +350,12 @@ while running:
 
         if event.type == pygame.VIDEORESIZE:
             current_width, current_height = pygame.display.get_surface().get_size()
-            cell_size, border_size, offset_x, offset_y = get_dimensions(current_width, current_height)
+            cell_size, border_size, offset_x, offset_y, thickness = get_dimensions(current_width, current_height)
             bg = pygame.transform.smoothscale(bg_orig, screen.get_size())
+            onecell = pygame.transform.smoothscale(onecell_orig, (cell_size, cell_size))
+            ul = pygame.transform.smoothscale(ul_orig, (cell_size, cell_size))
+            dr = pygame.transform.smoothscale(dr_orig, (cell_size, cell_size))
+            center = pygame.transform.smoothscale(center_orig, (cell_size, cell_size))
 
     clock.tick(60)
 
