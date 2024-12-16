@@ -6,7 +6,7 @@ window_heigth = 600
 
 field_width = 10 # ширина игрового поля
 field_height = 10 # высота поля
-ship_count = [4,3,2,1] # количества (n+1)-клеточных кораблей
+ship_count = [3,3,2,1] # количества (n+1)-клеточных кораблей
 
 border_fraction = 0 # толщина границы между клетками
 
@@ -256,22 +256,39 @@ def render(): # нарисовать клеточки
     for y, row in enumerate(field):
         for x, cell in enumerate(row):
             # pygame.draw.rect(screen, get_color(cell), (offset_x + border_size + x*(cell_size + border_size), offset_y + border_size + y*(cell_size + border_size), cell_size, cell_size))
-            pygame.draw.rect(screen, (0, 0, 0), (offset_x + border_size + x * (cell_size + border_size), offset_y + border_size + y * (cell_size + border_size), cell_size, cell_size), max(1, round(thickness)), border_radius=1)
+            pygame.draw.rect(screen, (155, 214, 51), (offset_x + border_size + x * (cell_size + border_size), offset_y + border_size + y * (cell_size + border_size), cell_size, cell_size), max(1, round(thickness)), border_radius=1)
 
             if not cell['opened']:
-                pygame.draw.rect(screen, (100,100,100), (offset_x + border_size + x * (cell_size + border_size),
+                pygame.draw.rect(screen, (56, 171, 140), (offset_x + border_size + x * (cell_size + border_size),
                                                            offset_y + border_size + y * (cell_size + border_size),
                                                            cell_size, cell_size))
             elif cell['size'] == 1:
                 screen.blit(onecell, (offset_x + border_size + x*(cell_size + border_size), offset_y + border_size + y*(cell_size + border_size)))
             elif cell['type'] == 'ULedge':
-                screen.blit(ul, (offset_x + border_size + x*(cell_size + border_size), offset_y + border_size + y*(cell_size + border_size)))
+                
+                if cell['orientation'] == 'h':
+                    screen.blit(ul, (offset_x + border_size + x*(cell_size + border_size), offset_y + border_size + y*(cell_size + border_size)))
+                else:
+                    screen.blit(ul_rotated, (offset_x + border_size + x*(cell_size + border_size), offset_y + border_size + y*(cell_size + border_size)))
+                
+                    
+                    
             elif cell['type'] == 'center':
-                screen.blit(center, (offset_x + border_size + x*(cell_size + border_size), offset_y + border_size + y*(cell_size + border_size)))
+                
+                if cell['orientation'] == 'h':
+                    screen.blit(center, (offset_x + border_size + x*(cell_size + border_size), offset_y + border_size + y*(cell_size + border_size)))
+                else:
+                    screen.blit(center_rotated, (offset_x + border_size + x*(cell_size + border_size), offset_y + border_size + y*(cell_size + border_size)))
+                
             elif cell['type'] == 'DRedge':
-                screen.blit(dr, (offset_x + border_size + x*(cell_size + border_size), offset_y + border_size + y*(cell_size + border_size)))
-
-
+                if cell['orientation'] == 'h':
+                    screen.blit(dr, (offset_x + border_size + x*(cell_size + border_size), offset_y + border_size + y*(cell_size + border_size)))
+                else:
+                    screen.blit(dr_rotated, (offset_x + border_size + x*(cell_size + border_size), offset_y + border_size + y*(cell_size + border_size)))
+                
+            if not cell['opened']:
+                pygame.draw.rect(screen, (155, 214, 51), (offset_x + border_size + x * (cell_size + border_size), offset_y + border_size + y * (cell_size + border_size), cell_size, cell_size), max(1, round(thickness)), border_radius=1)
+  
 
 
 
@@ -310,10 +327,10 @@ cell_size, border_size, offset_x, offset_y, thickness = get_dimensions(current_w
 
 
 bg_orig = pygame.image.load('underwater_bg.jpg')
-onecell_orig = pygame.image.load('1cell.jpg').convert()
-ul_orig = pygame.image.load('ul.jpg').convert()
-dr_orig = pygame.image.load('dr.jpg').convert()
-center_orig = pygame.image.load('center.jpg').convert()
+onecell_orig = pygame.image.load('1cell.png')
+ul_orig = pygame.image.load('ul.png')
+dr_orig = pygame.image.load('dr.png')
+center_orig = pygame.image.load('center.png')
 
 
 
@@ -327,6 +344,10 @@ ul = pygame.transform.smoothscale(ul_orig, (cell_size, cell_size))
 dr = pygame.transform.smoothscale(dr_orig, (cell_size, cell_size))
 center = pygame.transform.smoothscale(center_orig, (cell_size, cell_size))
 
+
+ul_rotated = pygame.transform.rotate(ul, -90)
+dr_rotated = pygame.transform.rotate(dr, -90)
+center_rotated = pygame.transform.rotate(center, -90)
 
 
 
@@ -356,6 +377,10 @@ while running:
             ul = pygame.transform.smoothscale(ul_orig, (cell_size, cell_size))
             dr = pygame.transform.smoothscale(dr_orig, (cell_size, cell_size))
             center = pygame.transform.smoothscale(center_orig, (cell_size, cell_size))
+
+            ul_rotated = pygame.transform.rotate(ul, -90)
+            dr_rotated = pygame.transform.rotate(dr, -90)
+            center_rotated = pygame.transform.rotate(center, -90)
 
     clock.tick(60)
 
