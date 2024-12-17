@@ -5,7 +5,7 @@ window_width = 800
 window_heigth = 600
 
 field_width = 10 # ширина игрового поля
-field_height = 3 # высота поля
+field_height = 10 # высота поля
 ship_count = [3,3,2,1] # количества (n+1)-клеточных кораблей
 
 border_fraction = -0.01 # толщина расстояния между клетками
@@ -208,7 +208,7 @@ def get_clicked_cell(pos):
 
 def render():
     # нарисовать клеточки
-    global field, cell_size, border_size, offset_x, offset_y
+    global field, cell_size, border_size, offset_x, offset_y, text_to_show, reveal_time, my_font, current_width, current_height
     for y, row in enumerate(field):
         for x, cell in enumerate(row):
 
@@ -243,18 +243,50 @@ def render():
 
 
 
+    if pygame.time.get_ticks() - reveal_time < 700:
+        text_surface = my_font.render(text_to_show, True, (117, 92, 27))
+
+        screen.blit(text_surface, (current_width/2.5, lin(0,700**3,current_height*0.8,current_height*1.2,(pygame.time.get_ticks() - reveal_time)**3)))
+
+
+
+def lin(a,b,c,d,t):
+    # map ab to cd
+    # t is in ab
+    # return t1 on cd
+    return c + (d - c) * ( (t - a) / (b - a) )
+
+
+
 def process_click(coords):
     # обработка нажатий
-    global field
+    global field, reveal_time, text_to_show
     if coords[0] != None and coords[1] != None:
         if field[coords[1]][coords[0]]['opened'] == 0:
             field[coords[1]][coords[0]]['opened'] = 1
+            reveal_time = pygame.time.get_ticks()
+            if field[coords[1]][coords[0]]['id'] == 0:
+                text_to_show = 'Вы не попали'
+            else:
+                text_to_show = 'Вы попали в корабль!!'
 
 
 
+
+
+reveal_time = 0
+text_to_show = ''
 pygame.init()
 screen = pygame.display.set_mode((window_width, window_heigth), pygame.RESIZABLE)
 clock = pygame.time.Clock()
+
+
+
+my_font = pygame.font.SysFont('Comic sans MS', 30)
+
+
+
+
 
 
 current_width, current_height = pygame.display.get_surface().get_size()
